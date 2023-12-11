@@ -78,6 +78,28 @@ def apply_projective_transform(transform, img):
     return new_img
 
 
+def rgb_to_hsv(r, g, b, scale_factor=1):
+    r, g, b = r / 255, g / 255, b / 255
+    cmax = max(r, g, b)
+    cmin = min(r, g, b)
+    diff = cmax - cmin
+
+    h = 0
+
+    if cmax == r:
+        h = (60 * ((g - b) / diff)) % 360
+    elif cmax == g:
+        h = (60 * ((b - r) / diff + 2)) % 360
+    elif cmax == b:
+        h = (60 * ((r - g) / diff + 4)) % 360
+
+    h = h if h >= 0 else h + 360
+    s = 0 if cmax == 0 else (diff / cmax) * scale_factor
+    v = cmax * scale_factor
+
+    return h, s, v
+
+
 def display_in_actual_size(img):
     dpi = mpl.rcParams["figure.dpi"]
     height, width = img.shape
