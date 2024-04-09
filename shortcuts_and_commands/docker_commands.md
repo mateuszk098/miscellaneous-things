@@ -54,8 +54,11 @@ docker history <obraz>:<tag>
 docker run [OPCJE] <obraz>:<tag> [POLECENIE]
 
 OPCJE:
-  -i, --interactive  # Tryb interaktywny, możliwość wysyłania/odbierania informacji.
-  -t, --tty          # Emulowanie terminala.
+  -i, --interactive            # Tryb interaktywny, możliwość wysyłania/odbierania informacji.
+  -t, --tty                    # Emulowanie terminala.
+  -d, --detach                 # Uruchomienie kontenera jako procesu w tle.
+  -e, --env <KLUCZ>=<WARTOŚĆ>  # Ustawienie zmiennej środowiskowej.
+  --name <nazwa>               # Nadanie nazwy kontenerowi. 
 
 POLECENIE:  # Kontener działa dopóki polecenie jest aktywne. Przykłady poleceń.
   bash      # Uruchomienie terminala.
