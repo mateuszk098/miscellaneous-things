@@ -86,7 +86,6 @@ docker logs <CONTAINER_ID>|<NAME>
 **4. Usuwanie kontenera:**
 
 ```bash
-docker container rm [OPTIONS] <CONTAINER_ID>|<NAME>
 docker rm [OPTIONS] <CONTAINER_ID>|<NAME>
 
 OPTIONS:
@@ -109,4 +108,45 @@ docker top <CONTAINER_ID>|<NAME>
 
 ```bash
 docker inspect <CONTAINER_ID>|<NAME>
+```
+
+## **ZARZĄDZANIE KONTENEREM**
+
+**1. Uruchomienie zatrzymanego kontenera:**
+
+```bash
+docker start <CONTAINER_ID>|<NAME>
+```
+
+**2. Zatrzymanie kontenera:**
+
+```bash
+docker stop [OPTIONS] <CONTAINER_ID>|<NAME>
+
+OPTIONS:
+  -t, --time <INT>  # Czas w sekundach zanim kontener zostanie ubity.
+```
+
+**3. Natychmiastowe ubicie kontenera:**
+
+```bash
+docker kill <CONTAINER_ID>|<NAME>
+```
+
+**4. Podpięcie się pod proces (polecenie) uruchomionego kontenera:**
+
+```bash
+docker attach <CONTAINER_ID>|<NAME>
+```
+
+**5. Wykonanie polecenia w uruchomionym kontenerze:**
+
+```bash
+docker exec [OPTIONS] <CONTAINER_ID>|<NAME> [COMMAND]
+
+OPTIONS:
+  -i, --interactive        # Tryb interaktywny.
+  -t, --tty                # Emulowanie terminala.
+  -d, --detach             # Uruchomienie polecenia w tle.
+  -e, --env <KEY>=<VALUE>  # Ustawienie zmiennej środowiskowej.
 ```
