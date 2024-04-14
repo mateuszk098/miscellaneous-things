@@ -58,7 +58,9 @@ OPTIONS:
   -t, --tty                # Emulowanie terminala.
   -d, --detach             # Uruchomienie kontenera jako procesu w tle.
   -e, --env <KEY>=<VALUE>  # Ustawienie zmiennej środowiskowej.
+  -m, --memory <BYTES>     # Limit zużywanej pamięci RAM.
   --name <NAME>            # Nadanie nazwy kontenerowi. 
+  --cpus <DECIMAL>         # Limit użycia CPU w % (np. 0.2 oznacza maks. 20%).
 
 COMMAND:    # Kontener działa dopóki polecenie jest aktywne. Przykłady poleceń.
   bash      # Uruchomienie terminala.
@@ -149,4 +151,85 @@ OPTIONS:
   -t, --tty                # Emulowanie terminala.
   -d, --detach             # Uruchomienie polecenia w tle.
   -e, --env <KEY>=<VALUE>  # Ustawienie zmiennej środowiskowej.
+```
+
+## **ZARZĄDZANIE ZASOBAMI**
+
+**1. Wyświetlanie zasobów zużywanych przez kontener na danej maszynie:**
+
+```bash
+docker stats [OPTIONS] [<CONTAINER_ID>|<NAME>]
+
+OPTIONS:
+  -a, --all  # Pokaż wszystkie kontenery.
+```
+
+**2. Czyszczenie pamięci hosta (usuwanie nieużywanych obrazów, kontenerów, etc.):**
+
+```bash
+docker system prune [OPTIONS]
+
+OPTIONS:
+  -a, --all    # Usuń wszystkie nieużywane zasoby.
+  -f, --force  # Nie pytaj o potwierdzenie.
+```
+
+## **WOLUMENY**
+
+**1. Kopiowanie plików między kontenerem a hostem:**
+
+```bash
+docker cp [OPTIONS] <PATH> <CONTAINER_ID>|<NAME>:<PATH>  # Z hosta na kontenera.
+docker cp [OPTIONS] <CONTAINER_ID>|<NAME>:<PATH> <PATH>  # Z kontenera na host.
+
+OPTIONS:
+  -a, --archive  # Tryb archiwum.
+```
+
+**2. Montowanie katalogu w kontenerze:**
+
+```bash
+docker run [...] -v <HOST_PATH>:<CONTAINER_PATH> [...]
+
+# Przykład uruchamiania kontenera Ubuntu z zamontowanym katalogiem 'data'.
+docker run -it -v /home/mateusz/data:/data ubuntu:22.04 bash
+```
+
+**3. Wyświetlanie wolumenów:**
+
+```bash
+docker volume ls
+
+# Wolumen to obiekt służący do przechowywania plików i katalogów. Wybrany wolumen
+# można podpinać do kilku kontenerów jednocześnie. Wolumen przechowuje informacje 
+# nawet wtedy gdy kontener jest nieaktywny (informacje w kontenerach nie są w żaden
+# sposób trwałe). Dlatego podpinamy wolumeny w celu utrwalenia danych. Przykładem 
+# może być np. kontener działający jako baza danych.
+```
+
+**4. Tworzenie wolumenu:**
+
+```bash
+docker volume create <VOLUME>
+```
+
+**5. Inspekcja wolumenu:**
+
+```bash
+docker volume inspect <VOLUME>
+```
+
+**6. Usuwanie wolumenu:**
+
+```bash
+docker volume rm <VOLUME>
+```
+
+**7. Montowanie wolumenu w kontenerze:**
+
+```bash
+docker run [...] -v <VOLUME>:<CONTAINER_PATH> [...]
+
+# Przykład uruchamiania kontenera Ubuntu z zamontowanym wolumenem 'data'.
+docker run -it -v data:/data ubuntu:22.04 bash
 ```
