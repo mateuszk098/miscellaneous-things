@@ -225,11 +225,86 @@ docker volume inspect <VOLUME>
 docker volume rm <VOLUME>
 ```
 
-**7. Montowanie wolumenu w kontenerze:**
+**7. Usuwanie nieużywanych wolumenów:**
+
+```bash
+docker volume prune [OPTIONS]
+
+OPTIONS:
+  -a, --all    # Usuń wszystkie nieużywane wolumeny.
+  -f, --force  # Nie pytaj o potwierdzenie.
+```
+
+**8. Montowanie wolumenu w kontenerze:**
 
 ```bash
 docker run [...] -v <VOLUME>:<CONTAINER_PATH> [...]
 
 # Przykład uruchamiania kontenera Ubuntu z zamontowanym wolumenem 'data'.
 docker run -it -v data:/data ubuntu:22.04 bash
+```
+
+## **SIECI**
+
+**1. Wyświetlanie dostępnych sieci:**
+
+```bash
+docker network ls
+```
+
+**2. Tworzenie sieci:**
+
+```bash
+# Domyślnie utworzona sieć posiada sterownik bridge i zasięg local.
+docker network create [OPTIONS] <NETWORK>
+
+OPTIONS:
+  --driver <STRING>   # Sterownik sieci, domyślnie bridge.
+  --gateway <STRING>  # Adres IPv4 lub IPv6 bramki.
+  --subnet <STRING>   # Adres podsieci w formacie CIDR.
+```
+
+**3. Podpinanie sieci do kontenera:**
+
+```bash
+docker run [...] --net <NETWORK> [...]
+```
+
+**4. Podłączenie danego kontenera do wybranej sieci:**
+
+```bash
+docker network connect [OPTIONS] <NETWORK> <CONTAINER_ID>|<NAME>
+
+OPTIONS:
+  --ip <STRING>  # Adres IPv4.
+```
+
+**5. Odłączenie danego kontenera od wybranej sieci:**
+
+```bash
+docker network disconnect [OPTIONS] <NETWORK> <CONTAINER_ID>|<NAME>
+
+OPTIONS:
+  -f, --force  # Odłączenie sieci na siłę.
+```
+
+**6. Przekierowanie portu podczas uruchamiania kontenera:**
+
+```bash
+docker run [...] -p <HOST_PORT>:<CONTAINER_PORT> [...]
+```
+
+**7. Usuwanie sieci:**
+
+```bash
+docker network rm <NETWORK>
+```
+
+**8. Usuwanie wszystkich nieużywanych sieci:**
+
+```bash
+docker network prune [OPTIONS]
+
+OPTIONS:
+  -f, --force  # Nie pytaj o potwierdzenie.
 ```
