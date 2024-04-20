@@ -308,3 +308,98 @@ docker network prune [OPTIONS]
 OPTIONS:
   -f, --force  # Nie pytaj o potwierdzenie.
 ```
+
+## **BUDOWANIE OBRAZÓW**
+
+**1. Tworzenie obrazu z kontenera:**
+
+```bash
+docker commit [OPTIONS] <CONTAINER_ID>|<NAME> <REPOSITORY>:<TAG>
+
+OPTIONS:
+  -a, --author <STRING>   # Autor.
+  -m, --message <STRING>  # Wiadomość.
+  -p, --pause             # Zatrzymaj kontener, domyślnie true.
+```
+
+**2. Zmiana nazwy obrazu i jego tagu:**
+
+```bash
+docker tag <SOURCE_IMAGE>:<TAG> <TARGET_IMAGE>:<TAG>
+```
+
+**3. Budowanie obrazu z pliku Dockerfile:**
+
+```bash
+docker build [OPTIONS] <CONTEXT_PATH>
+
+OPTIONS:
+  -t, --tag <NAME>:<TAG>      # Nazwa i opcjonalny tag obrazu.
+  -f, --file <STRING>         # Nazwa Dockerfile, domyślnie Dockerfile.
+  -q, --quiet                 # Wycisz output podczas budowania obrazu.
+  --build-arg <STRING_ARRAY>  # Zmienne do zbudowania obrazu.
+  --no-cache                  # Nie używaj cache budując obraz.
+```
+
+**4. Przykładowy Dockerfile:**
+
+```bash
+# Definiowanie zmiennej którą można przekazać podczas budowy obrazu.
+# Jeśli nie zostanie przekazana wartość dla zmiennej  to zostanie
+# użyta wartość domyślna.
+ARG UBUNTU_VERSION=22.04
+
+# Na podstawie jakiego obrazu ma zostać zbudowany obraz.
+FROM ubuntu:${UBUNTU_VERSION}
+
+# Ustawienie ścieżki do katalogu roboczego. Wszystkie komendy będą 
+# wykonywane w odniesieniu do tego katalogu. W przypadku jego braku 
+# zostanie on utworzony.
+WORKDIR /app
+
+# Ustawienie zmiennej środowiskowej. Można stosować pary <KEY> <VALUE>.
+# Jednakże zaleca się stosowanie par <KEY>=<VALUE>.
+# Można zdefiniować wiele zmiennych środowiskowych.
+ENV AUTHOR="John Doe" \ 
+    VERSION=1.0
+
+# Kopiowanie pliku z hosta do kontenera. Instrukcja COPY przyjmuje 
+# dwa argumenty - lokalizację pliku na hoście oraz lokalizację do 
+# jakiej przekopiować plik w kontenerze. Domyślnie COPY szuka plików
+# które kopiujemy w lokalizacji w której znajduje się Dockerfile.
+COPY script.sh /app/
+
+# Instrukcja ADD działa podobnie jak COPY, ale dodatkowo pozwala na
+# pobieranie plików z adresu URL. W przypadku ADD można stosować
+# adresy URL, pliki z archiwami oraz pliki z adresami URL.
+# Instrukcja ADD automatycznie rozpakowuje archiwa w kontenerze.
+# Instrukcja ADD jest bardziej obciążająca dla systemu niż COPY.
+ADD https://github.com/mateuszk098/argon-molecular-dynamics.git /app/core/
+
+# Wykonanie komendy w kontenerze. Można stosować wiele komend.
+# Flaga -y oznacza automatyczne potwierdzanie instalacji.
+RUN apt-get update && apt-get install -y curl
+
+# Instrukcja VOLUME służy do definiowania ścieżki w obrazie, która będzie
+# wymagała podpiętego wolumenu. Przyjmuje jeden argument w postaci ścieżki
+# do której będziemy podpinać wolumen. Instrukcja wymusza aby wolumen istniał
+# podczas uruchamiania kontenera. Jeżeli takowy nie istnieje to Docker utworzy
+# anonimowy wolumen.
+VOLUME /app
+
+# Instrukcja EXPOSE wystawia wskazany port na zewnątrz kontenera.
+EXPOSE 7000
+
+# Ustawienie domyślnego polecenia, które zostanie wykonane po uruchomieniu
+# kontenera. Można zdefiniować tylko jedno polecenie CMD. Polecenie można 
+# nadpisć w momencie uruchamiania kontenera.
+CMD ./script.sh
+
+# Instrukcja ENTRYPOINT podobnie jak CMD ustawia domyślne polecenie dla 
+# obrazu. Różnicą jest, że ENTRYPOINT nie może zostać nadpisany w momencie
+# uruchamiania kontenera. Argumenty jakie podamy za nazwą obrazu podczas 
+# uruchamiania kontenera staną się argumentami dla polecenia ENTRYPOINT.
+# Podczas budowania obrazu zaleca się umieścić tylko polecenie CMD lub 
+# tylko polecenie ENTRYPOINT. Należy unikać obu poleceń jednocześnie.
+ENTRYPOINT echo Docker
+```
