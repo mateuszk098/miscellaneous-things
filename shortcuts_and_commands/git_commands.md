@@ -135,13 +135,13 @@ git log --graph
 **6. Historia commitów w postaci grafu bez dodatkowych informacji:**
 
 ```bash
-git log --graph --oneline**
+git log --graph --oneline
 ```
 
 **7. Historia commitów w postaci grafu we wszystkich gałęziach bez dodatkowych informacji:**
 
 ```bash
-git log --graph --oneline --all**
+git log --graph --oneline --all
 ```
 
 **8. Historia commitów nawet tych usuniętych ale jedynie przez krótki czas:**
@@ -167,7 +167,7 @@ git diff --staged
 **3. Różnice między plikami w working tree oraz commitem w local repository:**
 
 ```bash
-git diff <COMMIT>>
+git diff <COMMIT>
 ```
 
 **4. Różnice między plikami w working tree oraz najnowszym commitem w local repository:**
@@ -201,7 +201,7 @@ git checkout HEAD <FILE>
 **1. Rozbijanie commitu na kilka commitów:**
 
 ```bash
-git add --patch <FILE>>
+git add --patch <FILE>
 ```
 
 ## **CZYM JEST HEAD**
@@ -421,7 +421,7 @@ git revert --abort
 **1. Klonowanie repozytorium (utworzy folder o nazwie repozytorium):**
 
 ```bash
-git clone <link_ssh_or_https
+git clone <HTTPS>|<SSH>
 ```
 
 **2. Informacja na temat zdalnego repozytorium, najczęściej origin:**
