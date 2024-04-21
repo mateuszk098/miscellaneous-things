@@ -343,9 +343,9 @@ OPTIONS:
 
 **4. Przykładowy Dockerfile:**
 
-```bash
+```dockerfile
 # Definiowanie zmiennej którą można przekazać podczas budowy obrazu.
-# Jeśli nie zostanie przekazana wartość dla zmiennej  to zostanie
+# Jeśli nie zostanie przekazana wartość dla zmiennej to zostanie
 # użyta wartość domyślna.
 ARG UBUNTU_VERSION=22.04
 
@@ -402,4 +402,76 @@ CMD ./script.sh
 # Podczas budowania obrazu zaleca się umieścić tylko polecenie CMD lub 
 # tylko polecenie ENTRYPOINT. Należy unikać obu poleceń jednocześnie.
 ENTRYPOINT echo Docker
+```
+
+## **OPTYMALIZACJA DOCKERFILE**
+
+**1. Kolejność instrukcji:**
+
+```dockerfile
+# Umieszczaj instrukcje, które rzadko lub w ogóle się nie zmieniają 
+# na początku Dockerfile. Przykładowo instrukcje ENV lub RUN. Z kolei
+# instrukcje takie jak COPY umieszczaj możliwie pod koniec Dockerfile.
+# Powód: cache. Kiedy zmieniamy coś w plikach które kopiujemy, Docker
+# musi ponownie zbudować warstwę która dotyczy kopiowania tych plików
+# oraz warstwy występujące po niej. 
+
+# Zamiast tego...
+COPY script.sh /app/
+RUN apt-get update && apt-get install -y curl
+
+# Stosuj to.
+RUN apt-get update && apt-get install -y curl
+COPY script.sh /app/
+```
+
+**2. Instrukcja USER:**
+
+```dockerfile
+# Domyślnym użytkownikiem w kontenerze jest root, który posiada 
+# nieograniczone uprawnienia. Dlatego dobrą praktyką jest tworzenie
+# obrazów, gdzie domyślnym użytkowniekiem jest tzw. non-root. 
+
+# Dodaj użytkownika 'user' z id 1000, katalogiem domowym /app oraz 
+# domyślną powłoką bash. Następnie zmień właściciela /app na user.
+RUN useradd -u 1000 -d /app -s /bin/bash user && \
+    chown -R user:user /app
+
+# Od tej pory instrukcje takie jak RUN, CMD, ENTRYPOINT są wykonywane
+# przez użytkownika 'user'.
+USER user
+
+# Kopiując pliki z hosta, zmień ich właściciela na 'user'.
+COPY --chown=user:user script.sh /app/ 
+```
+
+**3. Instrukcja HEALTHCHECK:**
+
+```dockerfile
+# Instrukcja HEALTHCHECK sprawdza, czy aplikacja działa poprawnie. W tym
+# przypadku sprawdzamy, czy serwer pogodowy wttr.in odpowiada na zapytania.
+# W przypadku, gdy serwer nie odpowiada, kontener zostanie zatrzymany
+# z kodem błędu 1.
+
+# --interval=30s - Określa, co ile czasu ma być wykonywane sprawdzenie.
+# --timeout=10s - Określa, po jakim czasie sprawdzenie zostanie zakończone.
+# --start-period=10s - Określa, po jakim czasie od uruchomienia kontenera 
+#                      ma zostać wykonane pierwsze sprawdzenie.
+# --retries=3 - Określa liczbę sukcesywnych porażek zanim kontener zostanie
+#               uznany za niezdrowy.
+
+HEALTHCHECK --interval=30s \ 
+    --timeout=10s \
+    --start-period=10s \
+    --retries=3 \
+    CMD curl https://wttr.in/Warsaw || exit 1
+```
+
+**4. Czyszczenie cache:**
+
+```dockerfile
+# Czyszczenie cache po instalacji pakietów pozwala na zmniejszenie rozmiaru obrazu.
+RUN apt-get update && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
 ```
