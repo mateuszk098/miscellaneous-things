@@ -475,3 +475,39 @@ RUN apt-get update && \
     apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/*
 ```
+
+**5. Montowanie w instrukcji RUN:**
+
+```dockerfile
+# Montowanie w instrukcji RUN pozwala na wykonanie kroków COPY i RUN w jednym
+# kroku RUN. Pozwala ono na skopiowania np. pliku configuracyjnego, uruchomieniu
+# go i usunięciu w jednej instrukcji. Dzięki temu zmniejszamy liczbę warstw
+# obrazu jak i zwiększamy bezpieczeństwo, ponieważ pliki konfiguracyjne zostają
+# usunięte po zainstalowaniu.
+
+# Przykład montowania pliku init.sh, który eksportuje dwie zmienne środowiskowe.
+# Następnie w celu testu przekazujemy wartości tych zmiennych do pliku info.log.
+# Na koniec plik init.sh jest usuwany i nie znajduje się w kontenerze.
+
+RUN --mount=type=bind,source=init.sh,target=/app/init.sh \
+    . /app/init.sh && echo $APP $APP_NAME > info.log
+```
+
+**6. Używaj hadolint do inspekcji Dockerfile:**
+
+```dockerfile
+# Biblioteka Haskell Dockerfile Linter (hadolint) pozwala na walidację
+# plików Dockerfile pod kątem stosowania najlepszych praktyk związanych
+# z budowaniem obrazów.
+
+# Link: https://github.com/hadolint/hadolint
+```
+
+**7. Używaj trivy do inspekcji obrazów:**
+
+```dockerfile
+# Narzędzie trivy znajduje luki w zabezpieczeniach, błędne konfiguracje, 
+# sekrety, SBOM w kontenerach, repozytoriach kodu, chmurach i nie tylko. 
+
+# Link: https://github.com/aquasecurity/trivy
+```
