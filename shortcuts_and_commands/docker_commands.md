@@ -153,6 +153,16 @@ OPTIONS:
   -e, --env <KEY>=<VALUE>  # Ustawienie zmiennej środowiskowej.
 ```
 
+**6. Aktualizowanie kontenera:**
+
+```bash
+docker update [OPTIONS] <CONTAINER_ID>|<NAME>
+
+OPTIONS:
+  --cpus <DECIMAL>  # Limit użycia CPU w % (np. 0.2 oznacza maks. 20%).
+  --memory <BYTES>  # Limit użycia pamięci RAM.
+```
+
 ## **ZARZĄDZANIE ZASOBAMI**
 
 **1. Wyświetlanie zasobów zużywanych przez kontener na danej maszynie:**
@@ -170,8 +180,9 @@ OPTIONS:
 docker system prune [OPTIONS]
 
 OPTIONS:
-  -a, --all    # Usuń wszystkie nieużywane zasoby.
-  -f, --force  # Nie pytaj o potwierdzenie.
+  -a, --all          # Usuń wszystkie nieużywane zasoby.
+  -f, --force        # Nie pytaj o potwierdzenie.
+  --filter <FILTER>  # Filtr, np. "until=24h".
 ```
 
 ## **WOLUMENY**
@@ -510,4 +521,142 @@ RUN --mount=type=bind,source=init.sh,target=/app/init.sh \
 # sekrety, SBOM w kontenerach, repozytoriach kodu, chmurach i nie tylko. 
 
 # Link: https://github.com/aquasecurity/trivy
+```
+
+## **DOCKER COMPOSE**
+
+**1. Polecenie docker compose:**
+
+```bash
+docker compose [OPTIONS] COMMAND
+
+OPTIONS:
+  --dry-run                    # Suchy start.
+  --progress <STRING>          # Progres output (auto, tty, plain, quiet).
+  -p, --project-name <STRING>  # Nazwa projektu.
+  -f, --file <STRING_ARRAY>    # Pliki konfiguracyjne compose.
+
+COMMAND:
+  build       # Zbuduj lub przebuduj serwisy.
+  config      # Parsuj plik compose do kanonicznego formatu.
+  create      # Utwórz kontenery dla serwisów. 
+  down        # Ztrzymaj i usuń kontenery/sieci.
+  images      # Wylistuj obrazy.
+  kill        # Wymuś zatrzymanie kontenerów.
+  pause       # Zatrzymaj serwisy.
+  ps          # Wylistuj kontenery.
+  restart     # Zresetuj kontenery.
+  start       # Uruchom serwisy.
+  stats       # Wyświetl statystyki zużycia dla uruchomionych kontenerów.
+  stop        # Zatrzymaj serwisy.
+  up          # Utwórz i uruchom serwisy.
+```
+
+**2. Przykładowy plik compose:**
+
+```yaml
+# Słowo kluczowe `services` definiuje listę obrazów i ich konfiguracji.
+services:
+  # Każdy serwis jest definiowany jako osobny blok.
+  # W tym przypadku serwis nazywa się ubuntu.
+  ubuntu:
+    # Argumenty związane z budowaniem obrazu.
+    build:
+      # Ścieżka względem której budowany jest obraz z Dockerfile.
+      context: .
+      # Ścieżka do pliku Dockerfile.
+      dockerfile: ./docker/Dockerfile
+      # Argumenty przekazywane do Dockerfile.
+      args:
+        # <KEY>: <VALUE>
+        UBUNTU_VERSION: 20.04
+    # Nazwa obrazu, która zostanie użyta do zbudowania obrazu.
+    image: ubuntu-example
+    # Nazwa kontenera.
+    container_name: ubuntu
+    # Ustawianie zmiennych środowiskowych.
+    environment:
+      # <KEY>=<VALUE>
+      - ENVIRONMENT=development
+      - VERSION=1.0.0
+    # Montowanie wolumenów.
+    volumes:
+      # Montowanie katalogu /home/user/data z hosta do /app/data w kontenerze.
+      # <HOST_PATH>:<CONTAINER_PATH>
+      # - /home/user/data:/app/data
+      # Montowanie wolumenu.
+      # <VOLUME_NAME>:<CONTAINER_PATH>
+      - my-volume:/app/logs
+    networks:
+      my-network:
+        # Przypisanie adresu IP do kontenera.
+        ipv4_address: 172.80.40.2
+    # Serwisy od których zależy serwis ubuntu.
+    depends_on:
+      - nginx
+    # Klucz `deploy` definiuje konfigurację związaną z wzdrażaniem kontenera.
+    deploy:
+      # Klucz `resources` definiuje zasoby, które będą dostępne dla kontenera.
+      resources:
+        # Górny limit zasobów.
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        # Minimalne zapotrzebowanie na zasoby.
+        reservations:
+          cpus: "1.0"
+          memory: 128M
+
+  # Kolejny serwis.
+  debian:
+    image: debian:latest
+    container_name: debian
+    # Klucz `command` zachowuje się jak instrukcja CMD w Dockerfile.
+    command: sleep inf
+    # Możliwe jest również przekazanie polecenia jako kolejnych argumentów:
+    # - sleep
+    # - inf
+    networks:
+      my-network:
+        ipv4_address: 172.80.40.3
+    depends_on:
+      - nginx
+
+  # Kolejny serwis.
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    # Klucz `ports` definiuje mapowanie portów.
+    ports:
+      # <HOST_PORT>:<CONTAINER_PORT>
+      - 8080:80
+    # Klucz `expose` definiuje porty, które będą dostępne dla innych kontenerów.
+    expose:
+      - 80
+    # Klucz `networks` definiuje sieć, do której ma być podłączony serwis.
+    networks:
+      - my-network
+
+# Definicja wolumenów.
+volumes:
+  my-volume:
+    name: my-volume
+    driver: local
+    driver_opts:
+      o: bind
+      # Bez żadnego typu systemu plików.
+      type: none
+      # Ścieżka do katalogu na hoście względem pliku compose.
+      device: ./logs
+
+# Definicja sieci.
+networks:
+  my-network:
+    name: my-network
+    ipam:
+      # Domyśly sterownik, w tym przypadku 'bridge'.
+      driver: default
+      # Konfiguracja adresu IP i jej rozmiaru.
+      config:
+        - subnet: 172.80.40.0/24
 ```
